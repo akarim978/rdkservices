@@ -328,6 +328,7 @@ char* getFactoryAppUrl()
 #else
 	factoryAppUrl = getenv("RDKSHELL_ASSEMBLY_FACTORY_APP_URL");
 #endif
+    std::cout << "LOGRDK factoryAppUrl" << factoryAppUrl << std::endl;
 	return factoryAppUrl;
 }
 #endif
@@ -805,8 +806,12 @@ namespace WPEFramework {
 	    std::thread rdkshellRequestsThread = std::thread([=]() {
                 JsonObject result;
                 std::string requestName = apiRequest.mName;
+                std::cout << "launchRequestThread requestName" << requestName << << std::endl;
+                std::cout << "launchRequestThread  apiRequest.mRequest " << apiRequest.mRequest << result << std::endl;
+
                 if (requestName.compare("launchFactoryApp") == 0)
                 {
+                    std::cout << "launchFactoryAppWrapper 0" << std::endl;
                     launchFactoryAppWrapper(apiRequest.mRequest, result);
                 }
 		        else if (requestName.compare("launchResidentApp") == 0)
@@ -3776,6 +3781,8 @@ namespace WPEFramework {
             }*/
             if (result)
             {
+                std::cout << "launchWrapper: result " << result << std::endl;
+
                 appCallsign = parameters["callsign"].String();
                 if (appCallsign.compare("SearchAndDiscovery") == 0)
                 {
@@ -3785,10 +3792,12 @@ namespace WPEFramework {
                 gLaunchDestroyMutex.lock();
                 if (gDestroyApplications.find(appCallsign) != gDestroyApplications.end())
                 {
+                    std::cout << "launchWrapper: gDestroyApplications " ;
                     isApplicationBeingDestroyed = true;
                 }
                 else
                 {
+                    std::cout << "launchWrapper: gLaunchApplications ";
                     gLaunchApplications[appCallsign] = true;
                 }
                 gLaunchDestroyMutex.unlock();
@@ -5144,6 +5153,8 @@ namespace WPEFramework {
             string method = "status";
             Core::JSON::ArrayType<PluginHost::MetaData::Service> joResult;
             auto thunderController = getThunderControllerClient();
+            std::cout << "RDKShell::getState LOGRDK thunderController" << thunderController << std::endl;
+
             thunderController->Get<Core::JSON::ArrayType<PluginHost::MetaData::Service>>(RDKSHELL_THUNDER_TIMEOUT, method.c_str(), joResult);
 
             JsonArray stateArray;
@@ -5158,9 +5169,11 @@ namespace WPEFramework {
                     service.Configuration.ToString(configLine);
                     if (!configLine.empty())
                     {
+                        std::cout << "RDKShell::getState !configLine.empty()" << std::endl;
                         JsonObject serviceConfig = JsonObject(configLine.c_str());
                         if (serviceConfig.HasLabel("clientidentifier"))
                         {
+                            std::cout << "RDKShell::getState serviceConfig.HasLabel clientidentifier" << std::endl;
                             std::string callsign;
                             service.Callsign.ToString(callsign);
 
@@ -5178,6 +5191,8 @@ namespace WPEFramework {
                             }
                             else
                             {
+                                std::cout << "RDKShell::getState hibernated" << std::endl;
+
                                 stateString = "hibernated";
                             }
 #endif
@@ -5201,10 +5216,12 @@ namespace WPEFramework {
                                 typeObject["state"] = stateString.Value();
                                 if (urlStatus == 0)
                                 {
+                                    std::cout << "RDKShell::getState urlStatus == 0" << std::endl;
                                     typeObject["uri"] = urlString.Value();
                                 }
                                 else
                                 {
+                                    std::cout << "RDKShell::getState urlStatus !" << std::endl;
                                     typeObject["uri"] = "";
                                 }
                                 gExitReasonMutex.lock();
@@ -5394,6 +5411,8 @@ namespace WPEFramework {
             }
             #else
              char* factoryAppUrl = getenv("RDKSHELL_FACTORY_APP_URL");
+             std::cout << "factoryAppUrl: >>>>> " << factoryAppUrl << std::endl;
+
             #endif
             if (NULL != factoryAppUrl)
             {
